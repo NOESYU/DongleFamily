@@ -10,7 +10,9 @@ public class GameManager : MonoBehaviour
     
     public GameObject effectPrefab;
     public Transform effectGroup;
-    
+
+    public bool isGameover;
+    public int score;
     public int maxLevel = 2;
 
     private void Awake()
@@ -40,6 +42,11 @@ public class GameManager : MonoBehaviour
 
     private void NextDongle()
     {
+        if (isGameover)
+        {
+            return;
+        }
+
         // 다음에 올 동글이 호출
         Dongle newDongle = GetDongle();
         lastDongle = newDongle;
@@ -82,5 +89,38 @@ public class GameManager : MonoBehaviour
         }
         lastDongle.Drop();
         lastDongle = null;
+    }
+
+    public void GameOver()
+    {
+        if (isGameover)
+        {
+            return;
+        }
+
+        isGameover = true;
+
+        // 스테이지에 쌓인 동글이들을 모두 없애면서
+        // 그 동글이들을 점수로 환산
+
+        StartCoroutine(GameoverRoutine());
+    }
+
+    IEnumerator GameoverRoutine()
+    {
+        Dongle[] dongles = FindObjectsOfType<Dongle>();
+
+        // 아래께 사라지면서 물리효과 적용되어 merge 되는거 방지하기위해 물리효과 제거
+        for(int i = 0; i < dongles.Length; i++)
+        {
+            dongles[i].playerRb.simulated = false;
+        }
+
+        for (int i = 0; i < dongles.Length; i++)
+        {
+            dongles[i].Hide(Vector3.up * 100); // 동글이 숨기는걸 게임 화면상 밖으로 없애버림
+        }
+
+        yield return new WaitForSeconds(0.2f);
     }
 }

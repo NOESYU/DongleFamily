@@ -11,15 +11,19 @@ public class Dongle : MonoBehaviour
     public bool isDrag; // 디폴트 false
     public bool isMerge; // 합쳐지는 중인지 판단
 
-    Rigidbody2D playerRb;
+    public Rigidbody2D playerRb;
     CircleCollider2D playerCol;
     Animator playerAnim;
+    SpriteRenderer spriteRenderer;
+
+    float deadTime;
 
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody2D>();
         playerAnim = GetComponent<Animator>();
         playerCol = GetComponent<CircleCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void OnEnable()
@@ -103,6 +107,11 @@ public class Dongle : MonoBehaviour
         playerRb.simulated = false;
         playerCol.enabled = false;
 
+        if (targetPos == Vector3.up * 100)
+        {
+            EffectPlay();
+        }
+
         StartCoroutine(HideRoutine(targetPos));
     }
 
@@ -112,9 +121,21 @@ public class Dongle : MonoBehaviour
         while (frameCount < 20)
         {
             frameCount++;
-            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+
+            if(targetPos != Vector3.up * 100)
+            {
+                transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            }
+            // 게임 종료시 비정상적인 targetPos 값을 전달한 경우
+            else if (targetPos == Vector3.up * 100)
+            {
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.2f);
+            }
             yield return null;
         }
+
+        // 점수 시스템
+        manager.score += (int)Mathf.Pow(2, level); // Pow :  지정숫자의 거듭제곱
 
         isMerge = false;
         gameObject.SetActive(false);
@@ -145,6 +166,34 @@ public class Dongle : MonoBehaviour
         manager.maxLevel = Mathf.Max(level, manager.maxLevel);
 
         isMerge = false;
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        // 일정시간(dead time)동안 line 과 닿아있으면 gameover
+        if(collision.tag == "Finish")
+        {
+            deadTime += Time.deltaTime;
+
+            if(deadTime >= 2)
+            {
+                spriteRenderer.color = Color.red;
+            }
+            if(deadTime >= 5)
+            {
+                manager.GameOver();
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // 경계선에 닿았다가 벗어났을 때
+        if(collision.tag == "Finish")
+        {
+            deadTime = 0;
+            spriteRenderer.color = Color.white;
+        }
     }
 
     void EffectPlay()
