@@ -5,6 +5,7 @@ using UnityEngine;
 public class Dongle : MonoBehaviour
 {
     public GameManager manager;
+    public ParticleSystem effect;
 
     public int level;
     public bool isDrag; // µðÆúÆ® false
@@ -135,7 +136,8 @@ public class Dongle : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
 
         playerAnim.SetInteger("Level", level + 1);
-
+        
+        EffectPlay();
         yield return new WaitForSeconds(0.3f);
         level++;
 
@@ -143,5 +145,12 @@ public class Dongle : MonoBehaviour
         manager.maxLevel = Mathf.Max(level, manager.maxLevel);
 
         isMerge = false;
+    }
+
+    void EffectPlay()
+    {
+        effect.transform.position = transform.position;
+        effect.transform.localScale = transform.localScale;
+        effect.Play();
     }
 }

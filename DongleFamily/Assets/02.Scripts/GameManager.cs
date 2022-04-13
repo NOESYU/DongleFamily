@@ -7,7 +7,10 @@ public class GameManager : MonoBehaviour
     public Dongle lastDongle;
     public GameObject donglePrefab;
     public Transform dongleGroup; // 새로 생성될 동글이 위치와 동글이가 생성될 부모
-
+    
+    public GameObject effectPrefab;
+    public Transform effectGroup;
+    
     public int maxLevel = 2;
 
     private void Awake()
@@ -22,9 +25,16 @@ public class GameManager : MonoBehaviour
 
     private Dongle GetDongle()
     {
-        // 동글이 생성 메소드
-        GameObject instant = Instantiate(donglePrefab, dongleGroup);
-        Dongle instantDongle = instant.GetComponent<Dongle>();
+        // 이펙트 생성
+        GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
+        ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
+
+        // 동글이 생성
+        GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup);
+        Dongle instantDongle = instantDongleObj.GetComponent<Dongle>();
+        
+        // 이펙트랑 동글이랑 1:1로 짝 지어줌
+        instantDongle.effect = instantEffect;
         return instantDongle;
     }
 
