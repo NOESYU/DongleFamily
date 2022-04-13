@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6273692846879495810}
   m_Layer: 0
   m_Name: Dongle
-  m_TagString: Player
+  m_TagString: Dongle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -137,6 +137,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   level: 0
   isDrag: 0
+  isMerge: 0
 --- !u!95 &6273692846879495810
 Animator:
   serializedVersion: 3

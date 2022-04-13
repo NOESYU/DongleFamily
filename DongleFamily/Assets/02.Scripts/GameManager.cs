@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
     public GameObject donglePrefab;
     public Transform dongleGroup; // 새로 생성될 동글이 위치와 동글이가 생성될 부모
 
+    public int maxLevel = 2;
+
     private void Awake()
     {
         Application.targetFrameRate = 60;        
@@ -31,7 +33,8 @@ public class GameManager : MonoBehaviour
         // 다음에 올 동글이 호출
         Dongle newDongle = GetDongle();
         lastDongle = newDongle;
-        lastDongle.level = Random.Range(0, 8);
+        lastDongle.manager = this;
+        lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
 
         StartCoroutine(WaitNext()); // StartCoroutine() : 코루틴 제어를 시작하기 위한 함수
