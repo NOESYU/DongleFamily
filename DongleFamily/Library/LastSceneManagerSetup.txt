@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Casual Physics Puzzle BE6/Demo/Sample Scene.unity
+- path: Assets/Dongle/01.Scenes/Dongle.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
