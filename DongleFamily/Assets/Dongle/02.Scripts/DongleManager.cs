@@ -11,6 +11,21 @@ public class DongleManager : MonoBehaviour
     public GameObject effectPrefab;
     public Transform effectGroup;
 
+    public AudioSource bgmPlayer;
+    public AudioSource[] sfxPlayer; // 효과음을 끊기지 않게하기위해 배열에 넣고 채널링
+    public AudioClip[] sfxClip;
+    public enum Sfx
+    {
+        LevelUp,
+        Next,
+        Attach,
+        Button,
+        GameOver
+    };
+
+    int sfxIndex;
+    
+
     public bool isGameover;
     public int score;
     public int maxLevel = 2;
@@ -22,6 +37,7 @@ public class DongleManager : MonoBehaviour
 
     private void Start()
     {
+        bgmPlayer.Play();
         NextDongle();
     }
 
@@ -53,6 +69,8 @@ public class DongleManager : MonoBehaviour
         lastDongle.manager = this;
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
+
+        SfxPlay(Sfx.Next);
 
         StartCoroutine(WaitNext()); // StartCoroutine() : 코루틴 제어를 시작하기 위한 함수
     }
@@ -102,7 +120,7 @@ public class DongleManager : MonoBehaviour
 
         // 스테이지에 쌓인 동글이들을 모두 없애면서
         // 그 동글이들을 점수로 환산
-
+        
         StartCoroutine(GameoverRoutine());
     }
 
@@ -119,8 +137,34 @@ public class DongleManager : MonoBehaviour
         for (int i = 0; i < dongles.Length; i++)
         {
             dongles[i].Hide(Vector3.up * 100); // 동글이 숨기는걸 게임 화면상 밖으로 없애버림
+            yield return new WaitForSeconds(0.2f);
         }
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(1f);
+        SfxPlay(Sfx.GameOver);
+    }
+
+    public void SfxPlay(Sfx audioType)
+    {
+        switch(audioType) {
+            case Sfx.LevelUp:
+                sfxPlayer[sfxIndex].clip = sfxClip[Random.Range(0, 3)];
+                break;
+            case Sfx.Next:
+                sfxPlayer[sfxIndex].clip = sfxClip[3];
+                break;
+            case Sfx.Attach:
+                sfxPlayer[sfxIndex].clip = sfxClip[4];
+                break;
+            case Sfx.Button:
+                sfxPlayer[sfxIndex].clip = sfxClip[5];
+                break;
+            case Sfx.GameOver:
+                sfxPlayer[sfxIndex].clip = sfxClip[6];
+                break;
+        }
+
+        sfxPlayer[sfxIndex].Play();
+        sfxIndex = (sfxIndex + 1) % sfxPlayer.Length;
     }
 }

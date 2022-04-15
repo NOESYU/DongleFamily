@@ -10,14 +10,15 @@ public class Dongle : MonoBehaviour
     public int level;
     public bool isDrag; // 디폴트 false
     public bool isMerge; // 합쳐지는 중인지 판단
-
+    public bool isAttach;
+    
     public Rigidbody2D playerRb;
     CircleCollider2D playerCol;
     Animator playerAnim;
     SpriteRenderer spriteRenderer;
 
     float deadTime;
-
+    
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody2D>();
@@ -64,6 +65,26 @@ public class Dongle : MonoBehaviour
     {
         isDrag = false;
         playerRb.simulated = true;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Attach
+        StartCoroutine(AttachRoutine());
+    }
+
+    IEnumerator AttachRoutine()
+    {
+        if (isAttach)
+        {
+            yield break;
+        }
+
+        isAttach = true;
+        manager.SfxPlay(DongleManager.Sfx.Attach);
+
+        yield return new WaitForSeconds(0.2f);
+        isAttach = false;
     }
 
     private void OnCollisionStay2D(Collision2D collision)
@@ -159,6 +180,8 @@ public class Dongle : MonoBehaviour
         playerAnim.SetInteger("Level", level + 1);
         
         EffectPlay();
+        manager.SfxPlay(DongleManager.Sfx.LevelUp);
+
         yield return new WaitForSeconds(0.3f);
         level++;
 
