@@ -32,6 +32,26 @@ public class Dongle : MonoBehaviour
         playerAnim.SetInteger("Level", level);
     }
 
+    private void OnDisable()
+    {
+        // 동글 속성 초기화
+        level = 0;
+        isDrag = false;
+        isMerge = false;
+        isAttach = false;
+
+        // 동글 트랜스폼(위치, 회전, 크기) 초기화 -> Dongle Group 에서 생성되어있으니 local 초기화
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = Vector3.zero;
+
+        // 동글 물리 초기화, 꺼진 col은 다시 켜주기
+        playerRb.simulated = false;
+        playerRb.velocity = Vector2.zero;
+        playerRb.angularVelocity = 0;
+        playerCol.enabled = true;
+    }
+
     private void Update()
     {
         if (isDrag)
@@ -160,6 +180,7 @@ public class Dongle : MonoBehaviour
 
         isMerge = false;
         gameObject.SetActive(false);
+        // 이대로 상태 비활성화만하면 오브젝트 풀링이 그대로 정보를 담고있어서 모든 정보 없애기 => OnDisable()
     }
 
     void LevelUp()

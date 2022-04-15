@@ -4,16 +4,24 @@ using UnityEngine;
 
 public class DongleManager : MonoBehaviour
 {
-    public Dongle lastDongle;
     public GameObject donglePrefab;
     public Transform dongleGroup; // 새로 생성될 동글이 위치와 동글이가 생성될 부모
-    
+    public List<Dongle> donglePool; // 동글이 오브젝트풀링을 위한 리스트
+
     public GameObject effectPrefab;
     public Transform effectGroup;
+    public List<ParticleSystem> effectPool; // 이펙트 오브젝트풀링을 위한 리스트
+
+    [Range(1, 30)] // 인스펙터창에서 간편하게 풀 사이즈를 슬라이더로 값을 조절하기 위해
+    public int poolSize;
+    public int poolIndex;
+
+    public Dongle lastDongle;
 
     public AudioSource bgmPlayer;
     public AudioSource[] sfxPlayer; // 효과음을 끊기지 않게하기위해 배열에 넣고 채널링
     public AudioClip[] sfxClip;
+    
     public enum Sfx
     {
         LevelUp,
@@ -25,14 +33,21 @@ public class DongleManager : MonoBehaviour
 
     int sfxIndex;
     
-
     public bool isGameover;
     public int score;
     public int maxLevel = 2;
 
     private void Awake()
     {
-        Application.targetFrameRate = 60;        
+        Application.targetFrameRate = 60;
+
+        donglePool = new List<Dongle>();
+        effectPool = new List<ParticleSystem>();
+
+        for(int i = 0; i < poolSize; i++)
+        {
+            MakeDongle();
+        }
     }
 
     private void Start()
@@ -41,19 +56,41 @@ public class DongleManager : MonoBehaviour
         NextDongle();
     }
 
-    private Dongle GetDongle()
+    // 오브젝트 풀을 만들기 위한 함수 생성
+    Dongle MakeDongle()
     {
         // 이펙트 생성
         GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
+        instantEffectObj.name = "Effect " + effectPool.Count;
         ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
+        effectPool.Add(instantEffect);
 
         // 동글이 생성
         GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup);
+        instantDongleObj.name = "Dongle " + donglePool.Count;
         Dongle instantDongle = instantDongleObj.GetComponent<Dongle>();
-        
+        instantDongle.manager = this;
+
         // 이펙트랑 동글이랑 1:1로 짝 지어줌
         instantDongle.effect = instantEffect;
+        donglePool.Add(instantDongle);
+
         return instantDongle;
+    }
+
+    private Dongle GetDongle()
+    {
+        for(int i = 0; i < donglePool.Count; i++)
+        {
+            poolIndex = (poolIndex + 1) % donglePool.Count;
+            if (!donglePool[poolIndex].gameObject.activeSelf)
+            {
+                return donglePool[poolIndex];
+            }
+        }
+
+        // 미리 생성해둔 동글이들이 모두 활성화중(사용중)이면 makedongle 을 다시 넘겨줌
+        return MakeDongle();
     }
 
     private void NextDongle()
@@ -64,9 +101,7 @@ public class DongleManager : MonoBehaviour
         }
 
         // 다음에 올 동글이 호출
-        Dongle newDongle = GetDongle();
-        lastDongle = newDongle;
-        lastDongle.manager = this;
+        lastDongle = GetDongle(); ;
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
 

@@ -1430,11 +1430,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c88e1f5bb8b1e644bbadb6db839bf21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lastDongle: {fileID: 0}
   donglePrefab: {fileID: 9068942440606972070, guid: 43ee10da18de60d46886228d89a5f357, type: 3}
   dongleGroup: {fileID: 2070591382}
+  donglePool: []
   effectPrefab: {fileID: 1178035622406408905, guid: d888f0438cc98ad46a9f1e620fe3b6bd, type: 3}
   effectGroup: {fileID: 1087445554}
+  effectPool: []
+  poolSize: 2
+  poolIndex: 0
+  lastDongle: {fileID: 0}
   bgmPlayer: {fileID: 1325252035}
   sfxPlayer:
   - {fileID: 170072235}
