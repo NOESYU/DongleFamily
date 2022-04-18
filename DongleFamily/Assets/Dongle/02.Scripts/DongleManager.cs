@@ -1,13 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class DongleManager : MonoBehaviour
 {
+    // 카테고리별로 변수 정리
+    [Header("---------------[ Core ]")]
+    public bool isGameover;
+    public int score;
+    public int maxLevel = 2;
+
+    [Header("---------------[ Object Pooling ]")]
     public GameObject donglePrefab;
     public Transform dongleGroup; // 새로 생성될 동글이 위치와 동글이가 생성될 부모
     public List<Dongle> donglePool; // 동글이 오브젝트풀링을 위한 리스트
-
+    
     public GameObject effectPrefab;
     public Transform effectGroup;
     public List<ParticleSystem> effectPool; // 이펙트 오브젝트풀링을 위한 리스트
@@ -18,6 +27,7 @@ public class DongleManager : MonoBehaviour
 
     public Dongle lastDongle;
 
+    [Header("---------------[ Audio ]")]
     public AudioSource bgmPlayer;
     public AudioSource[] sfxPlayer; // 효과음을 끊기지 않게하기위해 배열에 넣고 채널링
     public AudioClip[] sfxClip;
@@ -30,12 +40,15 @@ public class DongleManager : MonoBehaviour
         Button,
         GameOver
     };
-
     int sfxIndex;
+
+    [Header("---------------[ UI ]")]
+    public GameObject startGroup;
+    public GameObject endGroup;
+    public GameObject playGround;
+    public Text scoreText;
+    public Text maxScoreText;
     
-    public bool isGameover;
-    public int score;
-    public int maxLevel = 2;
 
     private void Awake()
     {
@@ -48,11 +61,26 @@ public class DongleManager : MonoBehaviour
         {
             MakeDongle();
         }
+
+        // 최고 점수 저장 & 불러오기
+        // PlayerPrefs : 데이터 저장을 담당하는 클래스
+        if (!PlayerPrefs.HasKey("MaxScore"))
+        {
+            PlayerPrefs.SetInt("MaxScore", 0);
+        }
+       
+        maxScoreText.text = PlayerPrefs.GetInt("MaxScore").ToString();
     }
 
-    private void Start()
+    public void GameStart()
     {
+        playGround.SetActive(true);
+        scoreText.gameObject.SetActive(true);
+        maxScoreText.gameObject.SetActive(true);
+        startGroup.SetActive(false);
+
         bgmPlayer.Play();
+        SfxPlay(Sfx.Button);
         NextDongle();
     }
 
@@ -176,7 +204,27 @@ public class DongleManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(1f);
+
+        // 최고점수갱신
+        int maxScore = Mathf.Max(score, PlayerPrefs.GetInt("MaxScore"));
+        PlayerPrefs.SetInt("MaxScore", maxScore);
+
+        endGroup.SetActive(true);
+
+        bgmPlayer.Stop();
         SfxPlay(Sfx.GameOver);
+    }
+
+    public void Reset()
+    {
+        SfxPlay(Sfx.Button);
+        StartCoroutine(RestCoroutine());
+    }
+
+    IEnumerator RestCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
+        SceneManager.LoadScene("Dongle");
     }
 
     public void SfxPlay(Sfx audioType)
@@ -201,5 +249,18 @@ public class DongleManager : MonoBehaviour
 
         sfxPlayer[sfxIndex].Play();
         sfxIndex = (sfxIndex + 1) % sfxPlayer.Length;
+    }
+
+    private void Update()
+    {
+        if (Input.GetButtonDown("Cancel"))
+        {
+            Application.Quit();
+        }
+    }
+    private void LateUpdate()
+    {
+        // Update 종료 후 실행되는 생명주기 함수
+        scoreText.text = "현재 점수 : " + score;
     }
 }
