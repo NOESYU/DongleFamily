@@ -10,7 +10,7 @@ public class DongleManager : MonoBehaviour
     [Header("---------------[ Core ]")]
     public bool isGameover;
     public int score;
-    public int maxLevel = 2;
+    public int maxLevel = 0;
 
     [Header("---------------[ Object Pooling ]")]
     public GameObject donglePrefab;
@@ -45,13 +45,18 @@ public class DongleManager : MonoBehaviour
     [Header("---------------[ UI ]")]
     public GameObject startGroup;
     public GameObject endGroup;
+    public GameObject ClearGroup;
     public GameObject playGround;
+    public GameObject helpPanel;
     public Text scoreText;
     public Text maxScoreText;
+    public Text levelText;
     
 
     private void Awake()
-    {
+    { 
+        //PlayerPrefs.DeleteAll();
+      
         Application.targetFrameRate = 60;
 
         donglePool = new List<Dongle>();
@@ -74,9 +79,11 @@ public class DongleManager : MonoBehaviour
 
     public void GameStart()
     {
+        // 시작화면에서 가려진 UI들 활성화 및 시작화면 비활성화
         playGround.SetActive(true);
         scoreText.gameObject.SetActive(true);
         maxScoreText.gameObject.SetActive(true);
+        levelText.gameObject.SetActive(true);
         startGroup.SetActive(false);
 
         bgmPlayer.Play();
@@ -209,7 +216,18 @@ public class DongleManager : MonoBehaviour
         int maxScore = Mathf.Max(score, PlayerPrefs.GetInt("MaxScore"));
         PlayerPrefs.SetInt("MaxScore", maxScore);
 
-        endGroup.SetActive(true);
+        // 게임 클리어 조건
+        // score 50점 이상 maxLevel 6 이상
+        if (score >= 5 && maxLevel >= 1)
+        {
+            ClearGroup.SetActive(true);
+            Debug.Log("Clear");
+        }
+
+        else
+        { 
+            endGroup.SetActive(true);
+        }
 
         bgmPlayer.Stop();
         SfxPlay(Sfx.GameOver);
@@ -225,6 +243,18 @@ public class DongleManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene("Dongle");
+    }
+
+    public void OnHelp()
+    {
+        SfxPlay(Sfx.Button);
+        helpPanel.SetActive(true);
+    }
+
+    public void OffHelp()
+    {
+        SfxPlay(Sfx.Button);
+        helpPanel.SetActive(false);
     }
 
     public void SfxPlay(Sfx audioType)
@@ -253,6 +283,7 @@ public class DongleManager : MonoBehaviour
 
     private void Update()
     {
+        // 모바일 뒤로가기 버튼 누를시 종료
         if (Input.GetButtonDown("Cancel"))
         {
             Application.Quit();
@@ -261,6 +292,7 @@ public class DongleManager : MonoBehaviour
     private void LateUpdate()
     {
         // Update 종료 후 실행되는 생명주기 함수
-        scoreText.text = "현재 점수 : " + score;
+        scoreText.text = "점수 : " + score;
+        levelText.text = "레벨 : " + (maxLevel + 1);
     }
 }

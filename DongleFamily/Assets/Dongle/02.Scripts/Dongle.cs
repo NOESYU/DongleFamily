@@ -61,8 +61,8 @@ public class Dongle : MonoBehaviour
             mousePos.y = 8; // 동글이 line보다 위에 오게끔 y값 고정
 
             // x축 경계 설정
-            float minX = -4.4f + transform.localScale.x / 2f; // 벽의위치와 동글이 반지름
-            float maxX = 4.4f - transform.localScale.x / 2f;
+            float minX = -4.8f + transform.localScale.x / 2f; // 벽의위치와 동글이 반지름
+            float maxX = 4.8f - transform.localScale.x / 2f;
 
             if (mousePos.x < minX)
             {
